@@ -16,6 +16,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
 import ua.testwork.racing.domain.usecase.LoadRacersUseCase
+import ua.testwork.racing.domain.usecase.UpdateRacersUseCase
 import ua.testwork.racing.presentation.utils.ActorMessage
 import ua.testwork.racing.presentation.utils.completionActor
 import ua.testwork.racing.presentation.utils.getRandomFloat
@@ -31,7 +32,8 @@ private const val TARGET_WINNERS_IN_RACE = 3
 
 @HiltViewModel
 class RaceScreenViewModel @Inject constructor(
-    private val loadRacersUseCase: LoadRacersUseCase
+    private val loadRacersUseCase: LoadRacersUseCase,
+    private val updateRacersUseCase: UpdateRacersUseCase
 ) : ViewModel() {
 
     private val _racingState: MutableStateFlow<RacingUiState> =
@@ -120,15 +122,21 @@ class RaceScreenViewModel @Inject constructor(
             when (state) {
                 is RacingUiState.InRace -> {
                     Log.e("FINISH", state.racers.toString())
-                    RacingUiState.Finish(
-                        state.racers.filter { it.isFinished }.sortedBy { it.finishedPosition }
-                    )
+                    val winners = state.racers.filter { it.isFinished }.sortedBy { it.finishedPosition }
+                    saveRaceStatistic(winners)
+                    RacingUiState.Finish(winners)
                 }
 
                 else -> {
                     throw IllegalStateException("wrong state>>>Expected ${RacingUiState.InRace::class.java.name}, but actual: ${state::class.java.name}")
                 }
             }
+        }
+    }
+
+    private fun saveRaceStatistic(winners: List<RacerInfo>){
+        viewModelScope.launch {
+            updateRacersUseCase.invoke(winners.map { it.racerId })
         }
     }
 }

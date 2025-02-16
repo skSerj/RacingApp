@@ -61,7 +61,7 @@ fun Greeting(
                 Button(
                     modifier = Modifier
                         .wrapContentSize(Alignment.TopCenter),
-                    onClick = { viewModel.onEvent(RacingUiEvent.onChooseNumOfRacers(5)) }
+                    onClick = { viewModel.onEvent(RacingUiEvent.onChooseNumOfRacers(8)) }
                 ) {
                     Text("start with 5 racers")
                 }

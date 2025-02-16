@@ -11,6 +11,7 @@ composeBom = "2025.02.00"
 kspVersion = "2.0.21-1.0.25"
 hiltVersion = "2.51.1"
 adaptiveVersion ="1.0.0"
+roomVersion = "2.6.1"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -30,6 +31,9 @@ androidx-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit
 androidx-material3 = { group = "androidx.compose.material3", name = "material3" }
 hilt-android = {group = "com.google.dagger", name = "hilt-android", version.ref = "hiltVersion"}
 hilt-compiler = {group = "com.google.dagger", name = "hilt-compiler", version.ref = "hiltVersion"}
+room-runtime = {group="androidx.room", name="room-runtime", version.ref = "roomVersion"}
+room-compiler = {group="androidx.room", name="room-compiler", version.ref = "roomVersion"}
+room-ktx = {group="androidx.room", name="room-ktx", version.ref = "roomVersion"}
 android-adaptive = {group = "androidx.compose.material3.adaptive", name = "adaptive", version.ref = "adaptiveVersion"}
 android-adaptive-layout = {group = "androidx.compose.material3.adaptive", name = "adaptive-layout", version.ref = "adaptiveVersion"}
 android-adaptive-navigation = {group = "androidx.compose.material3.adaptive", name = "adaptive-navigation", version.ref = "adaptiveVersion"}
