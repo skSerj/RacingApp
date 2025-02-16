@@ -1,4 +1,4 @@
-package ua.testwork.racing.presentation.screens.main
+package ua.testwork.racing.presentation
 
 import androidx.compose.runtime.Stable
 
@@ -20,5 +20,4 @@ data class RacerInfo(
 
 sealed interface RacingUiEvent {
     data class onChooseNumOfRacers(val num: Int): RacingUiEvent
-    object onShowRacerStatistics: RacingUiEvent
 }

@@ -1,7 +1,7 @@
 package ua.testwork.racing.presentation.utils
 
 import ua.testwork.racing.domain.model.Racer
-import ua.testwork.racing.presentation.screens.main.RacerInfo
+import ua.testwork.racing.presentation.RacerInfo
 
 fun List<Racer>.mapRacerListToRacerInfoList() =
     map { racer ->

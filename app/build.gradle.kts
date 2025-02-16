@@ -59,7 +59,13 @@ dependencies {
     implementation(libs.room.runtime)
     ksp(libs.room.compiler)
     implementation(libs.room.ktx)
+    //adaptiveUI
+    implementation(libs.android.adaptive)
+    implementation(libs.android.adaptive.layout)
+    implementation(libs.android.adaptive.navigation)
     //testing
+    testImplementation(libs.android.testing.mock)
+    testImplementation(libs.android.testing.coroutines)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

@@ -1,3 +1,15 @@
 <resources>
-    <string name="app_name">Racing</string>
+    <string name="app_name" translatable="false">Racing</string>
+    <string name="choose_count_title">Choose count of racers</string>
+    <string name="start">start</string>
+    <string name="prepare">preparing for race</string>
+    <string name="racing">FAST FAST FAST</string>
+    <string name="winners">Winners:</string>
+    <string name="first_place">1st:</string>
+    <string name="second_place">2nd:</string>
+    <string name="third_place">3rd:</string>
+    <string name="statistics">show stats</string>
+    <string name="statistics_title">Race Finishing Statistics</string>
+    <string name="name_title">Name</string>
+    <string name="finish_count">Number of Finishes</string>
 </resources>

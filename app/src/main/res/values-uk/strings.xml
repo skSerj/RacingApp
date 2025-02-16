@@ -1,0 +1,14 @@
+<resources>
+    <string name="choose_count_title">Виберіть кількість гонщиків</string>
+    <string name="start">почати</string>
+    <string name="prepare">готуємся до перегон</string>
+    <string name="racing">ШВИДКО ШВИДКО ШВИДКО</string>
+    <string name="winners">Переможці:</string>
+    <string name="first_place">1-е місце:</string>
+    <string name="second_place">2-е місце:</string>
+    <string name="third_place">3-е місце:</string>
+    <string name="statistics">статистика</string>
+    <string name="statistics_title">Статистика фінішів у гонках</string>
+    <string name="name_title">Ім\'я</string>
+    <string name="finish_count">Кількість фінішів</string>
+</resources>

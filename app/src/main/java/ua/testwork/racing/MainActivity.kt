@@ -2,32 +2,32 @@ package ua.testwork.racing
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.Button
-import androidx.compose.material3.LinearProgressIndicator
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
+import androidx.compose.foundation.layout.safeContentPadding
+import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
+import androidx.compose.material3.adaptive.layout.AnimatedPane
+import androidx.compose.material3.adaptive.layout.PaneAdaptedValue
+import androidx.compose.material3.adaptive.layout.SupportingPaneScaffold
+import androidx.compose.material3.adaptive.layout.SupportingPaneScaffoldRole
+import androidx.compose.material3.adaptive.navigation.rememberSupportingPaneScaffoldNavigator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import dagger.hilt.android.AndroidEntryPoint
-import ua.testwork.racing.presentation.screens.main.RaceScreenViewModel
+import ua.testwork.racing.presentation.RaceScreenViewModel
 import ua.testwork.racing.presentation.theme.RacingTheme
 import androidx.lifecycle.viewmodel.compose.viewModel
-import ua.testwork.racing.presentation.screens.main.RacingUiEvent
-import ua.testwork.racing.presentation.screens.main.RacingUiState
+import ua.testwork.racing.presentation.screens.RacersCountPickerView
+import ua.testwork.racing.presentation.RacingUiEvent
+import ua.testwork.racing.presentation.RacingUiState
+import ua.testwork.racing.presentation.screens.InRaceView
+import ua.testwork.racing.presentation.screens.PreparingView
+import ua.testwork.racing.presentation.screens.StatisticView
+import ua.testwork.racing.presentation.screens.WinnersView
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -35,79 +35,78 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            RacingTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        modifier = Modifier.padding(innerPadding)
-                    )
-                }
-            }
+            RacingTheme { Racing() }
         }
     }
 }
 
+@OptIn(ExperimentalMaterial3AdaptiveApi::class)
 @Composable
-fun Greeting(
-    modifier: Modifier = Modifier,
+fun Racing(
     viewModel: RaceScreenViewModel = viewModel()
 ) {
+    val navigator = rememberSupportingPaneScaffoldNavigator()
+
+    BackHandler(navigator.canNavigateBack()) {
+        navigator.navigateBack()
+    }
+
     val racingState by viewModel.racingState.collectAsState()
-    Box(
-        modifier = modifier,
-        contentAlignment = Alignment.TopCenter
-    ) {
-        when (val state = racingState) {
-            is RacingUiState.InitialState -> {
-                Button(
-                    modifier = Modifier
-                        .wrapContentSize(Alignment.TopCenter),
-                    onClick = { viewModel.onEvent(RacingUiEvent.onChooseNumOfRacers(8)) }
-                ) {
-                    Text("start with 5 racers")
-                }
-            }
+    val statistics by viewModel.statistics.collectAsState()
 
-            is RacingUiState.Preparing -> {
-                Text(
-                    modifier = Modifier
-                        .wrapContentSize(align = Alignment.Center),
-                    text = "racing start after: ${state.timeToStart}"
-                )
-            }
-
-            is RacingUiState.InRace -> {
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxSize(),
-                    verticalArrangement = Arrangement.Top,
-                    horizontalAlignment = Alignment.Start
-                ) {
-                    items(state.racers, key = { it.racerId }) { item ->
-                        LinearProgressIndicator(
-                            modifier = Modifier.fillParentMaxWidth(0.5f),
-                            progress = {
-                                item.progress
-                            },
-                            color = Color.Green,
-                            trackColor = Color.Gray
+    SupportingPaneScaffold(
+        directive = navigator.scaffoldDirective,
+        value = navigator.scaffoldValue,
+        mainPane = {
+            AnimatedPane(modifier = Modifier.safeContentPadding()) {
+                when (val state = racingState) {
+                    is RacingUiState.InitialState -> {
+                        RacersCountPickerView(
+                            modifier = Modifier.fillMaxSize(),
+                            onCountPick = {
+                                viewModel.onEvent(
+                                    RacingUiEvent.onChooseNumOfRacers(
+                                        it
+                                    )
+                                )
+                            }
                         )
                     }
-                }
-            }
 
-            is RacingUiState.Finish -> {
-                Column(
-                    Modifier.fillMaxSize(),
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    repeat(state.winners.size){ place ->
-                        Text("place:${place+1} :::> ${state.winners[place].name}")
+                    is RacingUiState.Preparing -> {
+                        PreparingView(
+                            modifier = Modifier.fillMaxSize(),
+                            text = state.timeToStart.toString()
+                        )
+                    }
+
+                    is RacingUiState.InRace -> {
+                        InRaceView(
+                            modifier = Modifier.fillMaxSize(),
+                            racers = state.racers
+                        )
+                    }
+
+                    is RacingUiState.Finish -> {
+                        WinnersView(
+                            modifier = Modifier.fillMaxSize(),
+                            winners = state.winners,
+                            isNeedShowStatsBtn = navigator.scaffoldValue[SupportingPaneScaffoldRole.Supporting] == PaneAdaptedValue.Hidden
+                        ) {
+                            navigator.navigateTo(SupportingPaneScaffoldRole.Supporting)
+                        }
                     }
                 }
-
             }
-        }
+        },
+        supportingPane = {
+            AnimatedPane(modifier = Modifier.safeContentPadding()) {
+                StatisticView(
+                    modifier = Modifier.fillMaxSize(),
+                    racers = statistics
+                )
+            }
+        },
+    )
 
-    }
 }

@@ -1,4 +1,4 @@
-package ua.testwork.racing.presentation.screens.main
+package ua.testwork.racing.presentation
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
@@ -15,6 +15,7 @@ import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
+import ua.testwork.racing.domain.model.Racer
 import ua.testwork.racing.domain.usecase.LoadRacersUseCase
 import ua.testwork.racing.domain.usecase.UpdateRacersUseCase
 import ua.testwork.racing.presentation.utils.ActorMessage
@@ -40,6 +41,9 @@ class RaceScreenViewModel @Inject constructor(
         MutableStateFlow(RacingUiState.InitialState)
     internal val racingState: StateFlow<RacingUiState> = _racingState.asStateFlow()
 
+    private val _statistics: MutableStateFlow<List<Racer>> = MutableStateFlow(listOf())
+    internal val statistics = _statistics.asStateFlow()
+
     private val exceptionHandler = CoroutineExceptionHandler { coroutineContext, throwable ->
         Log.e(VM_EXCEPTION_HANDLER_TAG, throwable.message, throwable)
     }
@@ -47,7 +51,19 @@ class RaceScreenViewModel @Inject constructor(
     internal fun onEvent(event: RacingUiEvent) {
         when (event) {
             is RacingUiEvent.onChooseNumOfRacers -> prepareRacers(event.num)
-            is RacingUiEvent.onShowRacerStatistics -> {}
+        }
+    }
+
+    init {
+        collectStatistics()
+    }
+
+    private fun collectStatistics() {
+        viewModelScope.launch {
+            loadRacersUseCase.getRacersStatisticFlow()
+                .collect { racers ->
+                    _statistics.value = racers
+                }
         }
     }
 
@@ -95,7 +111,7 @@ class RaceScreenViewModel @Inject constructor(
                                             finishedPosition = if (updatedProgress >= 1.0f) currentRacePosition.incrementAndGet() else racer.finishedPosition
                                         )
                                     } else racer
-                                }
+                                }.sortedByDescending { it.progress }
                                 RacingUiState.InRace(updatedRacers)
                             }
 
@@ -122,7 +138,8 @@ class RaceScreenViewModel @Inject constructor(
             when (state) {
                 is RacingUiState.InRace -> {
                     Log.e("FINISH", state.racers.toString())
-                    val winners = state.racers.filter { it.isFinished }.sortedBy { it.finishedPosition }
+                    val winners =
+                        state.racers.filter { it.isFinished }.sortedBy { it.finishedPosition }
                     saveRaceStatistic(winners)
                     RacingUiState.Finish(winners)
                 }
@@ -134,7 +151,7 @@ class RaceScreenViewModel @Inject constructor(
         }
     }
 
-    private fun saveRaceStatistic(winners: List<RacerInfo>){
+    private fun saveRaceStatistic(winners: List<RacerInfo>) {
         viewModelScope.launch {
             updateRacersUseCase.invoke(winners.map { it.racerId })
         }
