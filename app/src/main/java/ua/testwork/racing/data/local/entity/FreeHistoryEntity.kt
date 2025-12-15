@@ -58,7 +58,7 @@ data class HistoryShootPracticeEntity(
 
     @SerializedName("isConnectionWasLost")
     @ColumnInfo(name = "is_connection_was_lost", defaultValue = "0")
-    var isConnectionWasLost: Boolean
+    var isConnectionWasLost: Boolean = false
 
 ) : SyncObject() {
     companion object {

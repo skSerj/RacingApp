@@ -73,6 +73,8 @@ dependencies {
     implementation(libs.room.runtime)
     ksp(libs.room.compiler)
     implementation(libs.room.ktx)
+    implementation(libs.room.sipher)
+    implementation(libs.room.sql)
     //adaptiveUI
     implementation(libs.android.adaptive)
     implementation(libs.android.adaptive.layout)

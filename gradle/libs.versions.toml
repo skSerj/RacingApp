@@ -16,6 +16,7 @@ mockVersion = "1.13.7"
 coroutinesTestVersion = "1.7.3"
 gson = "2.8.6"
 kotlin_serialization_json = "1.3.3"
+room_cipher_ver = "4.12.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -45,6 +46,8 @@ android-testing-mock = {group = "io.mockk", name = "mockk", version.ref = "mockV
 android-testing-coroutines = {group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "coroutinesTestVersion"}
 gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
 kotlin-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlin_serialization_json" }
+room-sipher = { module = "net.zetetic:sqlcipher-android", version.ref = "room_cipher_ver"}
+room-sql = { module = "androidx.sqlite:sqlite-framework", version.ref = "roomVersion"}
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

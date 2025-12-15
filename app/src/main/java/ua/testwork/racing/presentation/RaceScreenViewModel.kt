@@ -15,8 +15,8 @@ import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
+import ua.testwork.racing.data.local.entity.HistoryShootPracticeEntity
 import ua.testwork.racing.domain.model.Racer
-import ua.testwork.racing.domain.model.StageShootingHistoryModel
 import ua.testwork.racing.domain.repository.DrillsHistoryRepository
 import ua.testwork.racing.domain.usecase.LoadRacersUseCase
 import ua.testwork.racing.domain.usecase.UpdateRacersUseCase
@@ -206,10 +206,10 @@ class RaceScreenViewModel @Inject constructor(
     private fun insertHistories() {
         viewModelScope.launch(Dispatchers.IO) {
             //generate n of basic histories
-            val numOfHistories = 100
-            val list = mutableListOf<StageShootingHistoryModel>()
+            val numOfHistories = 30000
+            val list = mutableListOf<HistoryShootPracticeEntity>()
             for (i in 1..numOfHistories) {
-                list.add(StageShootingHistoryModel(UUID.randomUUID().toString()))
+                list.add(HistoryShootPracticeEntity(internalId = UUID.randomUUID().toString()))
             }
             val startMillis = System.currentTimeMillis()
             _histories.update { it.copy(startInsertHistoriesDate = Date(startMillis)) }

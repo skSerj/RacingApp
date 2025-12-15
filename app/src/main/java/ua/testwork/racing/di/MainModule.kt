@@ -6,6 +6,7 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import net.zetetic.database.sqlcipher.SupportOpenHelperFactory
 import ua.testwork.racing.data.local.dao.HistoriesDao
 import ua.testwork.racing.data.local.dao.RacersDao
 import ua.testwork.racing.data.local.db.AppDatabase
@@ -26,7 +27,13 @@ object MainModule {
             app,
             AppDatabase::class.java,
             "racing.db"
-        ).build()
+        )
+            .openHelperFactory(
+                SupportOpenHelperFactory(
+                    "your-password".toByteArray()
+                )
+            )
+            .build()
     }
 
     @Provides
