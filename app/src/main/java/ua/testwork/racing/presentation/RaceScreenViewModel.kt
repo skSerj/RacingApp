@@ -16,12 +16,18 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
 import ua.testwork.racing.domain.model.Racer
+import ua.testwork.racing.domain.model.StageShootingHistoryModel
+import ua.testwork.racing.domain.repository.DrillsHistoryRepository
 import ua.testwork.racing.domain.usecase.LoadRacersUseCase
 import ua.testwork.racing.domain.usecase.UpdateRacersUseCase
+import ua.testwork.racing.presentation.screens.DrillsHistoriesEvent
+import ua.testwork.racing.presentation.screens.DrillsHistoriesState
 import ua.testwork.racing.presentation.utils.ActorMessage
 import ua.testwork.racing.presentation.utils.completionActor
 import ua.testwork.racing.presentation.utils.getRandomFloat
 import ua.testwork.racing.presentation.utils.mapRacerListToRacerInfoList
+import java.util.Date
+import java.util.UUID
 import java.util.concurrent.atomic.AtomicInteger
 import javax.inject.Inject
 import kotlin.random.Random
@@ -34,7 +40,8 @@ private const val TARGET_WINNERS_IN_RACE = 3
 @HiltViewModel
 class RaceScreenViewModel @Inject constructor(
     private val loadRacersUseCase: LoadRacersUseCase,
-    private val updateRacersUseCase: UpdateRacersUseCase
+    private val updateRacersUseCase: UpdateRacersUseCase,
+    private val drillsHistoriesRepository: DrillsHistoryRepository
 ) : ViewModel() {
 
     private val _racingState: MutableStateFlow<RacingUiState> =
@@ -43,6 +50,11 @@ class RaceScreenViewModel @Inject constructor(
 
     private val _statistics: MutableStateFlow<List<Racer>> = MutableStateFlow(listOf())
     internal val statistics = _statistics.asStateFlow()
+
+    private val _histories: MutableStateFlow<DrillsHistoriesState> =
+        MutableStateFlow(DrillsHistoriesState())
+    internal val histories = _histories.asStateFlow()
+
 
     private val exceptionHandler = CoroutineExceptionHandler { coroutineContext, throwable ->
         Log.e(VM_EXCEPTION_HANDLER_TAG, throwable.message, throwable)
@@ -56,6 +68,7 @@ class RaceScreenViewModel @Inject constructor(
 
     init {
         collectStatistics()
+        observeHistoriesCount()
     }
 
     private fun collectStatistics() {
@@ -154,6 +167,89 @@ class RaceScreenViewModel @Inject constructor(
     private fun saveRaceStatistic(winners: List<RacerInfo>) {
         viewModelScope.launch {
             updateRacersUseCase.invoke(winners.map { it.racerId })
+        }
+    }
+
+    internal fun observeHistoriesEvent(event: DrillsHistoriesEvent) {
+        when (event) {
+            DrillsHistoriesEvent.startObserve -> {
+                observeHistoriesCount()
+            }
+
+            DrillsHistoriesEvent.onStartInsert -> {
+                insertHistories()
+            }
+
+            DrillsHistoriesEvent.onStartGetting -> {
+                getAllHistories()
+            }
+
+            DrillsHistoriesEvent.onDeleteAll -> {
+                removeAllHistories()
+            }
+        }
+
+    }
+
+    private fun observeHistoriesCount() {
+        viewModelScope.launch(Dispatchers.IO) {
+            drillsHistoriesRepository.getHistoriesCount().collect { count ->
+                _histories.update {
+                    it.copy(
+                        historiesInDb = count
+                    )
+                }
+            }
+        }
+    }
+
+    private fun insertHistories() {
+        viewModelScope.launch(Dispatchers.IO) {
+            //generate n of basic histories
+            val numOfHistories = 100
+            val list = mutableListOf<StageShootingHistoryModel>()
+            for (i in 1..numOfHistories) {
+                list.add(StageShootingHistoryModel(UUID.randomUUID().toString()))
+            }
+            val startMillis = System.currentTimeMillis()
+            _histories.update { it.copy(startInsertHistoriesDate = Date(startMillis)) }
+            drillsHistoriesRepository.insertHistories(list)
+            val endMillis = System.currentTimeMillis()
+            val duration = endMillis - startMillis
+            _histories.update {
+                it.copy(
+                    insertHistoriesCompleteDate = Date(endMillis),
+                    insertingDurationInMillis = duration
+                )
+            }
+        }
+    }
+
+    private fun getAllHistories() {
+        viewModelScope.launch(Dispatchers.IO) {
+            val startMillis = System.currentTimeMillis()
+            _histories.update { it.copy(startGettingHistoriesDate = Date(startMillis)) }
+            val lists = drillsHistoriesRepository.getAllHistories()
+            val endMillis = System.currentTimeMillis()
+            val duration = endMillis - startMillis
+            _histories.update {
+                it.copy(
+                    getHistoriesCompleteDate = Date(endMillis),
+                    gettingHistoriesDurationInMillis = duration
+                )
+
+            }
+            println("get ${lists.size} histories from db")
+
+        }
+    }
+
+    private fun removeAllHistories() {
+        viewModelScope.launch(Dispatchers.IO) {
+            drillsHistoriesRepository.deleteAll()
+            _histories.update {
+                DrillsHistoriesState()
+            }
         }
     }
 }

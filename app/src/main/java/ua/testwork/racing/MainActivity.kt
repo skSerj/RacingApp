@@ -14,9 +14,11 @@ import androidx.compose.material3.adaptive.layout.SupportingPaneScaffold
 import androidx.compose.material3.adaptive.layout.SupportingPaneScaffoldRole
 import androidx.compose.material3.adaptive.navigation.rememberSupportingPaneScaffoldNavigator
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dagger.hilt.android.AndroidEntryPoint
 import ua.testwork.racing.presentation.RaceScreenViewModel
 import ua.testwork.racing.presentation.theme.RacingTheme
@@ -24,6 +26,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import ua.testwork.racing.presentation.screens.RacersCountPickerView
 import ua.testwork.racing.presentation.RacingUiEvent
 import ua.testwork.racing.presentation.RacingUiState
+import ua.testwork.racing.presentation.screens.DrillsHistoriesEvent
+import ua.testwork.racing.presentation.screens.DrillsHistoriesView
 import ua.testwork.racing.presentation.screens.InRaceView
 import ua.testwork.racing.presentation.screens.PreparingView
 import ua.testwork.racing.presentation.screens.StatisticView
@@ -53,6 +57,7 @@ fun Racing(
 
     val racingState by viewModel.racingState.collectAsState()
     val statistics by viewModel.statistics.collectAsState()
+    val histories by viewModel.histories.collectAsStateWithLifecycle()
 
     SupportingPaneScaffold(
         directive = navigator.scaffoldDirective,
@@ -61,14 +66,24 @@ fun Racing(
             AnimatedPane(modifier = Modifier.safeContentPadding()) {
                 when (val state = racingState) {
                     is RacingUiState.InitialState -> {
-                        RacersCountPickerView(
+//                        RacersCountPickerView(
+//                            modifier = Modifier.fillMaxSize(),
+//                            onCountPick = {
+//                                viewModel.onEvent(
+//                                    RacingUiEvent.onChooseNumOfRacers(
+//                                        it
+//                                    )
+//                                )
+//                            }
+//                        )
+                        LaunchedEffect(Unit) {
+                            viewModel.observeHistoriesEvent(DrillsHistoriesEvent.startObserve)
+                        }
+                        DrillsHistoriesView(
                             modifier = Modifier.fillMaxSize(),
-                            onCountPick = {
-                                viewModel.onEvent(
-                                    RacingUiEvent.onChooseNumOfRacers(
-                                        it
-                                    )
-                                )
+                            state = histories,
+                            onEvent = {
+                                viewModel.observeHistoriesEvent(it)
                             }
                         )
                     }

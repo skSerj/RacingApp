@@ -6,9 +6,12 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import ua.testwork.racing.data.local.dao.HistoriesDao
 import ua.testwork.racing.data.local.dao.RacersDao
 import ua.testwork.racing.data.local.db.AppDatabase
+import ua.testwork.racing.data.repository.DrillsHistoryRepositoryImpl
 import ua.testwork.racing.data.repository.RacersRepositoryImpl
+import ua.testwork.racing.domain.repository.DrillsHistoryRepository
 import ua.testwork.racing.domain.repository.RacersRepository
 import javax.inject.Singleton
 
@@ -33,6 +36,15 @@ object MainModule {
     @Singleton
     fun provideRacersRepository(dao: RacersDao): RacersRepository {
         return RacersRepositoryImpl(dao)
+    }
+
+    @Provides
+    fun provideHistoriesDao(database: AppDatabase): HistoriesDao = database.historiesDao()
+
+    @Provides
+    @Singleton
+    fun provideHistoriesRepository(dao: HistoriesDao): DrillsHistoryRepository {
+        return DrillsHistoryRepositoryImpl(dao)
     }
 
 }
