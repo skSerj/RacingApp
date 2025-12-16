@@ -7,6 +7,5 @@ import dagger.hilt.android.HiltAndroidApp
 class RacingApp: Application() {
     override fun onCreate() {
         super.onCreate()
-        System.loadLibrary("sqlcipher")
     }
 }
